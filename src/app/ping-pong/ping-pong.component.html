@@ -1,0 +1,154 @@
+<!-- ping-pong.component.html -->
+
+<div class="grid-bg"></div>
+
+<div class="game-wrapper">
+  <!-- HUD Panel -->
+  <div class="hud-container">
+    <div class="hud-left">
+      <div class="game-title">Neon Pong</div>
+      <button class="mute-button" (click)="toggleMute()" [title]="isMuted ? 'Unmute Sounds' : 'Mute Sounds'">
+        <svg *ngIf="!isMuted" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
+          <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
+          <path d="M8.707 11.182A4.5 4.5 0 0 0 10.025 8a4.5 4.5 0 0 0-1.318-3.182L8 5.525A3.5 3.5 0 0 1 9.025 8 3.5 3.5 0 0 1 8 10.475zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06"/>
+        </svg>
+        <svg *ngIf="isMuted" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06zm7.137 2.096a.5.5 0 0 1 0 .708L12.207 8l1.647 1.646a.5.5 0 0 1-.708.708L11.5 8.707l-1.646 1.647a.5.5 0 0 1-.708-.708L10.793 8 9.146 6.354a.5.5 0 1 1 .708-.708L11.5 7.293l1.646-1.647a.5.5 0 0 1 .708 0"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Scores -->
+    <div class="score-display">
+      <span class="player-score">{{ playerScore }}</span>
+      <span class="score-divider">:</span>
+      <span class="opponent-score">{{ opponentScore }}</span>
+    </div>
+
+    <div class="game-info">
+      <div>Mode: <span class="badge" [class.ai]="gameMode === 'ai'" [class.p2]="gameMode === 'p2'">{{ gameMode === 'ai' ? 'Vs AI' : 'Local 2P' }}</span></div>
+      <div *ngIf="gameMode === 'ai'">Difficulty: <span class="badge ai">{{ aiDifficulty }}</span></div>
+    </div>
+  </div>
+
+  <!-- Canvas Container viewport -->
+  <div class="canvas-container" [class.p2-turn]="gameMode === 'p2' && ballDirectionX > 0">
+    <canvas #gameCanvas width="800" height="400"></canvas>
+
+    <!-- Start Screen Overlay -->
+    <div class="overlay" *ngIf="gamePhase === 'menu'">
+      <div class="menu-card">
+        <h2>PONG PROTOCOL</h2>
+
+        <!-- Game Mode Selection -->
+        <div class="setting-section">
+          <span class="setting-label">Select Mode</span>
+          <div class="button-group">
+            <button class="option-btn" [class.active]="gameMode === 'ai'" (click)="setGameMode('ai')">
+              VS COMPUTER
+            </button>
+            <button class="option-btn" [class.active]="gameMode === 'p2'" (click)="setGameMode('p2')">
+              LOCAL 2 PLAYERS
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Difficulty Selection (Only visible if Mode is AI) -->
+        <div class="setting-section" *ngIf="gameMode === 'ai'">
+          <span class="setting-label">AI Level</span>
+          <div class="button-group three-cols">
+            <button class="option-btn" [class.active]="aiDifficulty === 'easy'" (click)="setDifficulty('easy')">
+              EASY
+            </button>
+            <button class="option-btn" [class.active]="aiDifficulty === 'medium'" (click)="setDifficulty('medium')">
+              MEDIUM
+            </button>
+            <button class="option-btn" [class.active]="aiDifficulty === 'impossible'" (click)="setDifficulty('impossible')">
+              UNBEATABLE
+            </button>
+          </div>
+        </div>
+
+        <!-- Control Mode Selection (For left player / single player) -->
+        <div class="setting-section">
+          <span class="setting-label">Your Controls</span>
+          <div class="button-group">
+            <button class="option-btn" [class.active]="controlType === 'keyboard'" (click)="setControlType('keyboard')">
+              KEYBOARD (W / S)
+            </button>
+            <button class="option-btn" [class.active]="controlType === 'mouse'" (click)="setControlType('mouse')">
+              MOUSE / TOUCH
+            </button>
+          </div>
+        </div>
+
+        <button class="action-btn" (click)="startGame()">
+          INITIALIZE GAME
+        </button>
+      </div>
+    </div>
+
+    <!-- Pause Screen Overlay -->
+    <div class="overlay" *ngIf="gamePhase === 'paused'">
+      <div class="menu-card">
+        <h2>SYSTEM PAUSED</h2>
+        <div style="margin-bottom: 24px; color: rgba(255, 255, 255, 0.6); font-size: 0.95rem;">
+          Press <span class="key-badge">ESC</span> to resume
+        </div>
+        <div class="btn-row">
+          <button class="action-btn secondary" (click)="exitToMenu()">
+            MAIN MENU
+          </button>
+          <button class="action-btn" (click)="resumeGame()">
+            RESUME
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Over Screen Overlay -->
+    <div class="overlay" *ngIf="gamePhase === 'gameover'">
+      <div class="menu-card game-over">
+        <h2>TRANSMISSION END</h2>
+        
+        <div class="winner-text" [class.player]="winner === 'player'" [class.opponent]="winner === 'opponent'">
+          <span>{{ winner === 'player' ? 'PLAYER 1' : (gameMode === 'ai' ? 'COMPUTER' : 'PLAYER 2') }}</span> WINS THE MATCH!
+        </div>
+
+        <div style="font-size: 1.1rem; margin-bottom: 30px; color: rgba(255, 255, 255, 0.7);">
+          Final score was <span style="font-weight: 700; color: #fff;">{{ playerScore }} - {{ opponentScore }}</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="action-btn secondary" (click)="exitToMenu()">
+            MAIN MENU
+          </button>
+          <button class="action-btn" (click)="startGame()">
+            REPLAY
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="controls-legend">
+    <div class="control-item">
+      <span>Player 1:</span>
+      <span class="key-badge">W</span>
+      <span class="key-badge">S</span>
+      <span>or mouse position</span>
+    </div>
+    <div class="control-item" *ngIf="gameMode === 'p2'">
+      <span>Player 2:</span>
+      <span class="key-badge">▲</span>
+      <span class="key-badge">▼</span>
+      <span>Arrow keys</span>
+    </div>
+    <div class="control-item">
+      <span>Pause:</span>
+      <span class="key-badge">ESC</span>
+    </div>
+  </div>
+</div>

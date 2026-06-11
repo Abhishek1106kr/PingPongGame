@@ -1,0 +1,392 @@
+/* ping-pong.component.css */
+
+:host {
+  display: block;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #fff;
+  background-color: #0b0914;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Retro grid animation */
+.grid-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 0, 127, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  transform: perspective(500px) rotateX(60deg) translateY(-100px);
+  transform-origin: top center;
+  animation: gridMove 20s linear infinite;
+  z-index: 1;
+}
+
+@keyframes gridMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 1000px;
+  }
+}
+
+/* Content Container */
+.game-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Header & HUD styling */
+.hud-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 20px;
+  background: rgba(20, 15, 35, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.game-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  background: linear-gradient(45deg, #00f0ff, #ff007f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+}
+
+.score-display {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 2.2rem;
+  font-weight: 900;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.player-score {
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.score-divider {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 1.5rem;
+}
+
+.opponent-score {
+  color: #ff007f;
+  text-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
+}
+
+.game-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  gap: 4px;
+}
+
+.badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.badge.ai {
+  border-color: rgba(255, 0, 127, 0.4);
+  color: #ff007f;
+}
+
+.badge.p2 {
+  border-color: rgba(0, 240, 255, 0.4);
+  color: #00f0ff;
+}
+
+/* Main Canvas and Viewport overlay */
+.canvas-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 2 / 1;
+  background: #060409;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 0, 127, 0.3);
+  box-shadow: 
+    0 0 30px rgba(255, 0, 127, 0.15),
+    inset 0 0 20px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+.canvas-container.p2-turn {
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 
+    0 0 30px rgba(0, 240, 255, 0.15),
+    inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Glassmorphism Menu Overlays */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(8, 5, 15, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.menu-card {
+  width: 90%;
+  max-width: 480px;
+  background: rgba(20, 15, 35, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(255, 0, 127, 0.1);
+  text-align: center;
+}
+
+.menu-card h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+  letter-spacing: 1px;
+  background: linear-gradient(to right, #ffffff, #8f85b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.menu-card.game-over h2 {
+  background: linear-gradient(to right, #ffb800, #ff007f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
+}
+
+/* Forms & Settings selection buttons */
+.setting-section {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.setting-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.button-group.three-cols {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.option-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.option-btn.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(255, 0, 127, 0.2));
+  border-color: #ff007f;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+}
+
+/* Action Buttons */
+.action-btn {
+  width: 100%;
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #ff007f, #00f0ff);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 10px;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(255, 0, 127, 0.6),
+    0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+.action-btn:active {
+  transform: translateY(1px);
+}
+
+.action-btn.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+}
+
+.action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-row {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+}
+
+.winner-text {
+  font-size: 1.4rem;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+.winner-text span {
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.winner-text.player span {
+  color: #00f0ff;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+.winner-text.opponent span {
+  color: #ff007f;
+  text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+
+/* Bottom Controls Legend */
+.controls-legend {
+  margin-top: 20px;
+  display: flex;
+  gap: 30px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(20, 15, 35, 0.4);
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.key-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+/* Mute Toggle Button */
+.mute-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  width: 32px;
+  height: 32px;
+}
+
+.mute-button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.hud-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
